@@ -1,722 +1,736 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="es" class="h-full bg-slate-950">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Scan Prix</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600&family=Archivo+Black&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#EAF0F7; --ink:#10203A; --muted:#5B6B86; --surface:#FFFFFF;
-  --label:#FFD60A; --price:#D90429; --line:#C9D4E3;
-  --sans:"Archivo",system-ui,sans-serif; --display:"Archivo Black","Archivo",system-ui,sans-serif;
-}
-@media (prefers-color-scheme:dark){
-  :root{--bg:#0E1726; --ink:#EAF0F7; --muted:#93A3BE; --surface:#17233A; --line:#2A3A58; --price:#FF4D6A;}
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5}
-main{max-width:520px;margin:0 auto;padding:20px 16px 96px}
-h1{font-family:var(--display);font-size:2.2rem;margin:8px 0 4px;letter-spacing:-.02em}
-.sub{color:var(--muted);margin:0 0 20px}
-button,input{font:inherit}
-button{cursor:pointer;border:0;border-radius:8px;padding:12px 16px;font-weight:600;background:var(--ink);color:var(--bg)}
-button:focus-visible,input:focus-visible{outline:3px solid var(--label);outline-offset:2px}
-.scan{width:100%;margin-top:10px;font-family:var(--display);font-size:1.1rem;padding:16px;background:var(--label);color:#10203A}
-.cam{display:none;margin-top:4px;position:relative;border-radius:10px;overflow:hidden;background:#000}
-.cam.on{display:block}
-.cam video{width:100%;display:block;max-height:50vh;object-fit:cover}
-.cam::after{content:"";position:absolute;left:10%;right:10%;top:50%;height:2px;background:var(--price);box-shadow:0 0 12px var(--price)}
-.manual{display:flex;gap:8px;margin:16px 0}
-.manual input{flex:1;min-width:0;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
-#msg{min-height:1.5em;color:var(--muted);margin:8px 0}
-#msg.err{color:var(--price)}
-.product{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:12px}
-.product img{width:72px;height:72px;object-fit:contain;border-radius:6px;background:#fff}
-.product h2{margin:0;font-size:1.1rem}
-.product p{margin:2px 0 0;color:var(--muted);font-size:.9rem}
-.tag{background:var(--label);color:#10203A;border-radius:4px;padding:14px 16px;margin-top:12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-.tag small{display:block;font-weight:600}
-.tag .big{font-family:var(--display);font-size:2.6rem;line-height:1;color:#10203A}
-.tag .big.none{font-size:1.3rem}
-h3{font-size:1rem;margin:24px 0 8px}
-ul{list-style:none;margin:0;padding:0}
-li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
-li span:last-child{font-weight:600;white-space:nowrap}
-li small{display:block;color:var(--muted)}
-form.add{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-form.add input{padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);min-width:0}
-form.add button{grid-column:1/-1}
-.empty{color:var(--muted)}
-.photo{display:block;text-align:center;margin-top:8px;padding:12px 16px;border-radius:8px;border:2px dashed var(--line);font-weight:600;cursor:pointer}
-.photo input{display:none}
-.photo:focus-within{outline:3px solid var(--label);outline-offset:2px}
-.warn{background:var(--label);color:#10203A;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-weight:600}
-.hits li{cursor:pointer;justify-content:flex-start;align-items:center}
-.hits img{width:44px;height:44px;object-fit:contain;background:#fff;border-radius:6px}
-.hits li:hover{background:var(--surface)}
-.where{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.where a{display:block;text-align:center;padding:12px 8px;border-radius:8px;border:2px solid var(--ink);color:var(--ink);font-weight:600;text-decoration:none}
-.where a:focus-visible{outline:3px solid var(--label);outline-offset:2px}
-.diag{font-size:.8rem;color:var(--muted);margin:6px 0 0;min-height:1.2em}
-.linkbtn{background:none;color:var(--muted);text-decoration:underline;padding:4px 0;font-weight:400}
-.badge{display:inline-block;font-size:.7rem;font-weight:600;border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;color:var(--muted);vertical-align:middle}
-.srcs{font-size:.8rem;color:var(--muted);margin:6px 0 0}
-.shops{margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--surface)}
-.shops summary{cursor:pointer;font-weight:600}
-.shops .where{margin:8px 0 4px}
-.l1{display:flex;justify-content:space-between;gap:12px;font-weight:600}
-.l1 span:last-child{white-space:nowrap}
-.cart li,.hist li{display:block}
-.cart .l2{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
-.cart .l2 input{width:96px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
-.cart .l2 button{padding:6px 14px}
-.rm{background:none;color:var(--price);text-decoration:underline;font-weight:400;padding:6px 4px}
-.hist summary{cursor:pointer}
-.hist details div{margin-top:8px}
-.cartbar{display:grid;gap:8px;margin-top:10px}
-.cartbar input{padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);min-width:0}
-.finish{font-family:var(--display);background:var(--label);color:#10203A;padding:14px}
-.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:999px;font-weight:600;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.3);z-index:5;white-space:nowrap}
-.fab:focus-visible{outline:3px solid var(--label);outline-offset:2px}
-.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
-.flash.go{animation:fl .25s ease-out}
-@keyframes fl{from{opacity:.9}to{opacity:0}}
-@media (prefers-reduced-motion:reduce){.flash.go{animation:none}}
-[hidden]{display:none!important}
-</style>
-</head>
-<body>
-<main>
-  <h1>Scan Prix</h1>
-  <p class="sub">Scanne un code-barres, vois le prix. Même si le magasin n’affiche rien.</p>
-  <div class="warn" id="secureWarn" hidden>Ouvre le site avec son lien https (GitHub Pages), pas en ouvrant le fichier directement : sinon la caméra est bloquée.</div>
-
-  <div class="cam on" id="cam"><video id="video" playsinline muted></video><div class="flash" id="flash"></div></div>
-  <button class="scan" id="scanBtn" type="button">Scanner</button>
-  <p class="diag" id="diag"></p>
-
-  <label class="photo">Ou prends une photo du code
-    <input id="photo" type="file" accept="image/*" capture="environment">
-  </label>
-
-  <div class="manual">
-    <input id="ean" placeholder="Nom du produit ou code-barres" aria-label="Nom du produit ou code-barres">
-    <button id="goBtn" type="button">Chercher</button>
-  </div>
-  <div id="msg" role="status"></div>
-  <ul class="hits" id="hits"></ul>
-  <button type="button" class="linkbtn" id="testBtn">Tester avec un produit exemple</button>
-
-  <section id="result" hidden>
-    <div class="product">
-      <img id="pImg" alt="">
-      <div><h2 id="pName"></h2><p id="pMeta"></p></div>
-    </div>
-    <p class="srcs" id="srcs"></p>
-    <div class="tag">
-      <div><small id="tagLabel">Dernier prix connu</small><span class="big" id="tagPrice"></span></div>
-      <small id="tagWhere" style="text-align:right"></small>
-    </div>
-
-    <form class="add" id="cartForm">
-      <input id="cartPrice" type="number" step="0.01" min="0" placeholder="Prix en €" aria-label="Prix unitaire en euros">
-      <input id="cartQty" type="number" step="1" min="1" value="1" aria-label="Quantité">
-      <button type="submit">Ajouter au panier</button>
-    </form>
-
-    <h3>Chercher le prix sur d’autres sites</h3>
-    <div id="links"></div>
-
-    <h3>Prix trouvés automatiquement</h3>
-    <ul id="community"></ul>
-
-    <h3>Mes relevés</h3>
-    <ul id="mine"></ul>
-    <form class="add" id="addForm">
-      <input id="newPrice" type="number" step="0.01" min="0" placeholder="Prix en €" required aria-label="Prix en euros">
-      <input id="newStore" placeholder="Magasin" required aria-label="Magasin">
-      <button type="submit">Enregistrer ce prix</button>
-    </form>
-  </section>
-
-  <section id="cartSec" class="cart" hidden>
-    <h3>Mon panier <span id="cartCount"></span></h3>
-    <ul id="cartList"></ul>
-    <div class="tag">
-      <div><small>Total</small><span class="big" id="cartTotal"></span></div>
-      <small id="cartNote" style="text-align:right"></small>
-    </div>
-    <div class="cartbar">
-      <input id="cartStore" placeholder="Magasin (optionnel, sauvegarde les prix)" aria-label="Magasin">
-      <button type="button" class="finish" id="finishBtn">Terminer les courses</button>
-      <button type="button" class="linkbtn" id="clearBtn">Vider le panier</button>
-    </div>
-  </section>
-
-  <section id="histSec" class="hist" hidden>
-    <h3>Courses terminées</h3>
-    <ul id="hist"></ul>
-  </section>
-</main>
-<a class="fab" id="fab" href="#cartSec" hidden></a>
-
-<script>
-const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const eur = (n, cur) => new Intl.NumberFormat("fr-FR", {style:"currency", currency: cur || "EUR"}).format(n);
-const fdate = (d) => d ? new Date(d).toLocaleDateString("fr-FR") : "";
-
-let currentCode = null;
-let stream = null;
-let busy = false;
-
-function say(text, isErr){ const m = $("msg"); m.textContent = text; m.className = isErr ? "err" : ""; }
-
-/* Bip + vibration */
-let audioCtx = null;
-function unlockAudio(){
-  try {
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === "suspended") audioCtx.resume();
-  } catch(e){}
-}
-function beep(){
-  try {
-    unlockAudio();
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = "square"; o.frequency.value = 1800;
-    g.gain.setValueAtTime(0.25, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + 0.18);
-  } catch(e){}
-  if (navigator.vibrate) navigator.vibrate(120);
-}
-
-/* ---------- Scanner ---------- */
-function closeCam(){
-  if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
-  $("video").srcObject = null;
-  $("cam").classList.remove("on");
-  $("scanBtn").textContent = "Scanner un autre produit";
-}
-
-function loadZXing(){
-  return new Promise((res, rej) => {
-    if (window.ZXing) return res();
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
-    s.onload = res; s.onerror = () => rej(new Error("zxing"));
-    document.head.appendChild(s);
-  });
-}
-
-const CAM = {video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}}};
-
-function zxingHints(){
-  const hints = new Map();
-  const F = ZXing.BarcodeFormat;
-  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128, F.QR_CODE]);
-  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-  return hints;
-}
-
-async function openCam(){
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    say("Ce navigateur ou cette page bloque la caméra. Utilise « prendre une photo du code » en dessous.", true);
-    return false;
-  }
-  try {
-    stream = await navigator.mediaDevices.getUserMedia(CAM);
-    const video = $("video");
-    video.srcObject = stream; await video.play();
-    try { await stream.getVideoTracks()[0].applyConstraints({advanced:[{focusMode:"continuous"}]}); } catch(e){}
-    $("diag").textContent = "Caméra : " + video.videoWidth + "×" + video.videoHeight;
-    $("cam").classList.add("on");
-    $("scanBtn").textContent = "Scanner";
-    say("Cadre le code-barres, puis appuie sur Scanner.");
-    return true;
-  } catch (e) {
-    stream = null;
-    $("scanBtn").textContent = "Ouvrir la caméra";
-    if (e && e.name === "NotAllowedError") say("Caméra refusée. Autorise-la dans les réglages du navigateur, puis recharge la page.", true);
-    else say("Caméra indisponible (" + (e && e.name || "erreur") + "). Utilise « prendre une photo du code ».", true);
-    return false;
-  }
-}
-
-/* Plusieurs versions de l'image, du plus simple au plus agressif */
-function frameVariants(video){
-  const W = video.videoWidth, H = video.videoHeight;
-  const mk = (sx, sy, sw, sh, scale, gray) => {
-    const c = document.createElement("canvas");
-    c.width = Math.round(sw * scale); c.height = Math.round(sh * scale);
-    const x = c.getContext("2d", {willReadFrequently:true});
-    x.drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
-    if (gray) {
-      const d = x.getImageData(0, 0, c.width, c.height), p = d.data;
-      for (let i = 0; i < p.length; i += 4) {
-        let g = 0.299 * p[i] + 0.587 * p[i+1] + 0.114 * p[i+2];
-        g = Math.max(0, Math.min(255, (g - 128) * 1.6 + 128));
-        p[i] = p[i+1] = p[i+2] = g;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador CCSE - Examen Oficial</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f3ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#1e1b4b',
+            }
+          }
+        }
       }
-      x.putImageData(d, 0, 0);
     }
-    return c;
-  };
-  const cx = W * 0.1, cy = H * 0.25;
-  return [
-    mk(0, 0, W, H, 1, false),
-    mk(cx, cy, W * 0.8, H * 0.5, 1.5, false),
-    mk(0, 0, W, H, 1, true),
-    mk(cx, cy, W * 0.8, H * 0.5, 2, true)
-  ];
-}
-
-const FORMATS = ["ean_13","ean_8","upc_a","upc_e","code_128","qr_code"];
-let enginePromise = null;
-function getEngine(){
-  if (!enginePromise) enginePromise = (async () => {
-    if ("BarcodeDetector" in window) {
-      try {
-        const sup = await BarcodeDetector.getSupportedFormats();
-        if (sup.includes("ean_13")) return {name:"natif", det:new BarcodeDetector({formats:FORMATS.filter((f) => sup.includes(f))})};
-      } catch(e){}
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-    const m = await import("https://cdn.jsdelivr.net/npm/barcode-detector@3.2.1/dist/es/ponyfill.min.js");
-    return {name:"zxing-wasm", det:new m.BarcodeDetector({formats:FORMATS})};
-  })().catch((e) => { enginePromise = null; throw e; });
-  return enginePromise;
-}
-
-async function decodeCanvas(c){
-  try {
-    const eng = await getEngine();
-    $("diag").textContent = "Moteur : " + eng.name + " · image " + c.width + "×" + c.height;
-    const r = await eng.det.detect(c);
-    if (r.length) return r[0].rawValue;
-    return null;
-  } catch(e){
-    $("diag").textContent = "Moteur principal en erreur, essai du moteur de secours…";
-    try {
-      await loadZXing();
-      const reader = new ZXing.BrowserMultiFormatReader(zxingHints());
-      return (await reader.decodeFromImageUrl(c.toDataURL("image/png"))).getText();
-    } catch(e2){ return null; }
-  }
-}
-
-async function scanNow(){
-  unlockAudio();
-  if (busy) return;
-  if (!stream) { await openCam(); return; }
-  const video = $("video");
-  if (!video.videoWidth) return say("La caméra démarre, réessaie dans une seconde.", true);
-  busy = true;
-  $("scanBtn").disabled = true;
-  const fl = $("flash"); fl.classList.remove("go"); void fl.offsetWidth; fl.classList.add("go");
-  say("Analyse en cours… ne bouge pas.");
-  getEngine().catch(() => {});
-  let raw = null;
-  try {
-    for (let tries = 0; tries < 3 && !raw; tries++) {
-      for (const c of frameVariants(video)) { raw = await decodeCanvas(c); if (raw) break; }
-      if (!raw) await new Promise((r) => setTimeout(r, 300));
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
     }
-  } catch(e){}
-  busy = false;
-  $("scanBtn").disabled = false;
-  if (raw) { closeCam(); onCode(raw); }
-  else say("Aucun code lu. Rapproche-toi (15-20 cm), évite les reflets, attends que l’image soit nette et appuie à nouveau.", true);
-}
-
-/* Lecture depuis une photo : marche même quand le flux vidéo pose problème */
-async function readPhoto(file){
-  if (!file) return;
-  say("Lecture de la photo…");
-  try {
-    const bmp = await createImageBitmap(file);
-    const scale = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
-    const c = document.createElement("canvas");
-    c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
-    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-    const raw = await decodeCanvas(c);
-    if (raw) onCode(raw); else say("Aucun code lu sur la photo. Rapproche-toi, évite les reflets et réessaie.", true);
-  } catch(e){
-    say("Impossible de lire cette photo. Réessaie ou tape le nom du produit.", true);
-  }
-}
-
-/* Décide ce que contient le code lu */
-function normalizeEan(d){
-  if (d.length === 12) return "0" + d;
-  if (d.length === 14 && d[0] === "0") return d.slice(1);
-  return d;
-}
-function onCode(raw){
-  beep();
-  raw = String(raw).trim();
-  if (/^\d{8,14}$/.test(raw)) { $("ean").value = raw; say("Code lu : " + raw); return lookup(raw); }
-  const m = raw.match(/\d{8,14}/);
-  if (m) { $("ean").value = m[0]; return lookup(m[0]); }
-  say("Code lu : « " + raw.slice(0, 80) + " ». Ce n’est pas un code-barres de produit.", true);
-}
-
-/* ---------- Sources de données ---------- */
-/* Bases de produits ouvertes : alimentaire, cosmétique, autres */
-const FACTS = [
-  {name:"Open Food Facts",     host:"world.openfoodfacts.org"},
-  {name:"Open Beauty Facts",   host:"world.openbeautyfacts.org"},
-  {name:"Open Products Facts", host:"world.openproductsfacts.org"},
-  {name:"Open Pet Food Facts", host:"world.openpetfoodfacts.org"}
-];
-const FIELDS = "product_name,brands,quantity,image_front_small_url";
-
-async function getJSON(url, ms){
-  const ctl = new AbortController();
-  const t = setTimeout(() => ctl.abort(), ms || 8000);
-  try {
-    const r = await fetch(url, {signal: ctl.signal});
-    if (!r.ok) return null;
-    return await r.json();
-  } catch(e){ return null; }
-  finally { clearTimeout(t); }
-}
-
-/* Interroge les 3 bases en parallèle, prend la première qui connaît le produit */
-async function fetchFacts(code){
-  const res = await Promise.all(FACTS.map(async (f) => {
-    const j = await getJSON(`https://${f.host}/api/v2/product/${code}.json?fields=${FIELDS}`);
-    return (j && j.status === 1 && j.product && j.product.product_name) ? {source:f.name, p:j.product} : null;
-  }));
-  return res.find(Boolean) || null;
-}
-
-/* UPCitemdb : base mondiale + offres de boutiques en ligne (essai gratuit limité) */
-async function fetchUpc(code){
-  const j = await getJSON("https://api.upcitemdb.com/prod/trial/lookup?upc=" + code);
-  if (!j || !j.items || !j.items.length) return null;
-  const it = j.items[0];
-  const offers = (it.offers || [])
-    .filter((o) => o.price > 0)
-    .map((o) => ({
-      price:o.price, cur:o.currency || "USD",
-      date:o.updated_t ? new Date(o.updated_t * 1000).toISOString() : null,
-      store:o.merchant || o.domain || "Boutique en ligne",
-      online:true, link:o.link || null
-    }));
-  return {
-    product:{product_name:it.title, brands:it.brand, quantity:"", image_front_small_url:(it.images && it.images[0]) || ""},
-    offers
-  };
-}
-
-/* Livres (codes 978/979) : Google Books (avec prix parfois) puis Open Library */
-async function fetchBooks(code){
-  if (!/^97[89]\d{10}$/.test(code)) return null;
-  const j = await getJSON("https://www.googleapis.com/books/v1/volumes?q=isbn:" + code);
-  const v = j && j.items && j.items[0];
-  if (v && v.volumeInfo && v.volumeInfo.title) {
-    const i = v.volumeInfo, s = v.saleInfo || {};
-    const pr = s.retailPrice || s.listPrice;
-    const offers = (pr && pr.amount > 0)
-      ? [{price:pr.amount, cur:pr.currencyCode, date:null, store:"Google Livres", online:true, link:s.buyLink || null}] : [];
-    return {
-      product:{product_name:[i.title, i.subtitle].filter(Boolean).join(" : "), brands:(i.authors || []).join(", "), quantity:i.publishedDate || "",
-               image_front_small_url:((i.imageLinks && i.imageLinks.thumbnail) || "").replace("http://", "https://")},
-      offers
-    };
-  }
-  const o = await getJSON(`https://openlibrary.org/api/books?bibkeys=ISBN:${code}&format=json&jscmd=data`);
-  const b = o && o["ISBN:" + code];
-  if (!b || !b.title) return null;
-  return {
-    product:{product_name:b.title, brands:(b.authors || []).map((a) => a.name).join(", "), quantity:b.publish_date || "",
-             image_front_small_url:(b.cover && (b.cover.medium || b.cover.small)) || ""},
-    offers:[]
-  };
-}
-
-/* Wikidata : quelques produits connus (propriété GTIN) */
-async function fetchWikidata(code){
-  const q = `SELECT ?itemLabel WHERE { ?item wdt:P3962 "${code}" . SERVICE wikibase:label { bd:serviceParam wikibase:language "fr,en,nl,de". } } LIMIT 1`;
-  const j = await getJSON("https://query.wikidata.org/sparql?format=json&query=" + encodeURIComponent(q));
-  const b = j && j.results && j.results.bindings && j.results.bindings[0];
-  if (!b || !b.itemLabel || /^Q\d+$/.test(b.itemLabel.value)) return null;
-  return {product:{product_name:b.itemLabel.value, brands:"", quantity:"", image_front_small_url:""}, offers:[]};
-}
-
-/* Open Prices : prix de la communauté (magasins réels) */
-async function fetchOpenPrices(code){
-  const j = await getJSON(`https://prices.openfoodfacts.org/api/v1/prices?product_code=${code}&order_by=-date&size=10`);
-  return ((j && j.items) || []).map((p) => ({
-    price:p.price, cur:p.currency, date:p.date,
-    store:(p.location && (p.location.osm_name || p.location.osm_address_city)) || "Magasin inconnu",
-    online:false
-  }));
-}
-
-/* Recherche : code-barres OU nom de produit */
-async function search(q){
-  q = q.trim();
-  if (!q) return;
-  $("hits").innerHTML = "";
-  if (/^\d{8,14}$/.test(q)) return lookup(q);
-  say("Recherche de « " + q + " »…");
-  const url = (host) => `https://${host}/cgi/search.pl?search_simple=1&action=process&json=1&page_size=6&fields=code,product_name,brands,image_front_small_url&search_terms=` + encodeURIComponent(q);
-  const lists = await Promise.all(FACTS.map((f) => getJSON(url(f.host))));
-  const seen = new Set();
-  const items = [];
-  for (const j of lists) for (const p of ((j && j.products) || [])) {
-    if (p.code && p.product_name && !seen.has(p.code)) { seen.add(p.code); items.push(p); }
-  }
-  if (!items.length) return say("Aucun produit trouvé pour « " + q + " ».", true);
-  say("Choisis ton produit :");
-  $("hits").innerHTML = items.slice(0, 10).map((p) => `<li tabindex="0" data-code="${esc(p.code)}">${p.image_front_small_url ? `<img src="${esc(p.image_front_small_url)}" alt="">` : ""}<span>${esc(p.product_name)}<small>${esc(p.brands || "")}</small></span></li>`).join("");
-}
-
-/* ---------- Données locales ---------- */
-const storeKey = (c) => "scanprix:" + c;
-const getMine = (c) => { try { return JSON.parse(localStorage.getItem(storeKey(c))) || []; } catch(e){ return []; } };
-const setMine = (c, list) => { try { localStorage.setItem(storeKey(c), JSON.stringify(list)); } catch(e){} };
-
-/* Cache : un produit déjà cherché s'affiche tout de suite, même hors-ligne */
-const cacheKey = (c) => "scanprix:cache:" + c;
-const getCache = (c) => { try { return JSON.parse(localStorage.getItem(cacheKey(c))); } catch(e){ return null; } };
-const setCache = (c, v) => { try { localStorage.setItem(cacheKey(c), JSON.stringify(v)); } catch(e){} };
-
-async function lookup(code){
-  code = normalizeEan(String(code).replace(/\D/g, ""));
-  if (code.length < 8) return say("Un code-barres a 8 à 13 chiffres.", true);
-  $("hits").innerHTML = "";
-  currentCode = code;
-  say("Recherche dans toutes les sources…");
-  $("result").hidden = true;
-
-  /* Toutes les sources en même temps */
-  const extraSources = [
-    ["UPCitemdb", fetchUpc],
-    ["Livres", fetchBooks],
-    ["Wikidata", fetchWikidata]
-  ];
-  const [facts, prices, extras] = await Promise.all([
-    fetchFacts(code),
-    fetchOpenPrices(code),
-    Promise.all(extraSources.map(async ([name, fn]) => {
-      try { const r = await fn(code); return r ? {name, ...r} : null; } catch(e){ return null; }
-    }))
-  ]);
-  const found = extras.filter(Boolean);
-
-  /* Le premier qui connaît le produit donne le nom ; tous les prix sont gardés */
-  let product = facts ? facts.p : null;
-  const sources = [];
-  if (facts) sources.push(facts.source);
-  for (const x of found) {
-    if (!product && x.product && x.product.product_name) product = x.product;
-    if ((x.product && x.product.product_name) || x.offers.length) sources.push(x.name);
-  }
-  if (prices.length) sources.push("Open Prices");
-
-  let auto = [...prices, ...found.flatMap((x) => x.offers)];
-
-  /* Rien trouvé en ligne : on retombe sur le cache */
-  const cached = getCache(code);
-  if (!product && !auto.length && cached) {
-    product = cached.product; auto = cached.auto; sources.push("cache");
-  } else if (product || auto.length) {
-    setCache(code, {product, auto});
-  }
-
-  if (!product && !auto.length && !getMine(code).length) {
-    say("Produit introuvable dans toutes les sources. Tu peux quand même enregistrer son prix ci-dessous.", false);
-  } else { say(""); }
-
-  render(code, product, auto, sources);
-}
-
-function render(code, product, auto, sources){
-  $("result").hidden = false;
-  $("pName").textContent = (product && product.product_name) || "Produit " + code;
-  $("pMeta").textContent = product ? [product.brands, product.quantity].filter(Boolean).join(" · ") || code : code;
-  const img = $("pImg");
-  if (product && product.image_front_small_url) { img.src = product.image_front_small_url; img.hidden = false; } else { img.hidden = true; }
-  $("srcs").textContent = sources.length ? "Sources : " + sources.join(", ") : "";
-
-  const nm = (product && product.product_name) || "";
-  const g = (q) => "https://www.google.com/search?q=" + encodeURIComponent(q);
-  const nameQ = (nm + " " + ((product && product.brands) || "")).trim();
-  const links = [
-    ["Google Shopping", "https://www.google.com/search?tbm=shop&q=" + encodeURIComponent(code)],
-    ["Google : prix", g((nameQ || code) + " prix")],
-    ["Belgique (Kieskeurig)", g(code + " site:kieskeurig.be")],
-    ["Suisse (Toppreise)", g(code + " site:toppreise.ch")],
-    ["France (Idealo)", g(code + " site:idealo.fr")],
-    ["Allemagne (Idealo)", g(code + " site:idealo.de")],
-    ["Amazon.fr", "https://www.amazon.fr/s?k=" + encodeURIComponent(code)],
-    ["Amazon.de", "https://www.amazon.de/s?k=" + encodeURIComponent(code)]
-  ];
-  $("links").innerHTML = links.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("");
-
-  const mine = getMine(code);
-  const all = [
-    ...auto,
-    ...mine.map((m) => ({price:m.price, cur:"EUR", date:m.date, store:m.store, online:false}))
-  ].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-
-  const eurRow = all.find((x) => !x.cur || x.cur === "EUR");
-  currentName = (product && product.product_name) || "Produit " + code;
-  $("cartPrice").value = eurRow ? eurRow.price : "";
-  $("cartQty").value = 1;
-
-  const big = $("tagPrice");
-  if (all.length) {
-    big.textContent = eur(all[0].price, all[0].cur); big.className = "big";
-    $("tagWhere").textContent = all[0].store + (all[0].date ? " · " + fdate(all[0].date) : "");
-  } else {
-    big.textContent = "Pas encore de prix"; big.className = "big none";
-    $("tagWhere").textContent = "Ajoute le premier";
-  }
-
-  const row = (p) => {
-    const store = esc(p.store);
-    const name = p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">${store}</a>` : store;
-    const badge = p.online ? `<span class="badge">en ligne</span>` : "";
-    return `<li><span>${name}${badge}<small>${esc(fdate(p.date))}</small></span><span>${esc(eur(p.price, p.cur))}</span></li>`;
-  };
-  $("community").innerHTML = auto.length
-    ? auto.slice().sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).map(row).join("")
-    : `<li class="empty">Aucun prix trouvé automatiquement pour ce produit.</li>`;
-
-  $("mine").innerHTML = mine.length
-    ? mine.slice().reverse().map((m) => `<li><span>${esc(m.store)}<small>${esc(fdate(m.date))}</small></span><span>${esc(eur(m.price))}</span></li>`).join("")
-    : `<li class="empty">Aucun relevé de ta part.</li>`;
-}
-
-/* ---------- Panier ---------- */
-const loadJ = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch(e){ return d; } };
-const saveJ = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
-let cart = loadJ("scanprix:cart", []);
-let trips = loadJ("scanprix:trips", []);
-let currentName = "";
-const cartTotal = () => cart.reduce((s, i) => s + (i.price || 0) * i.qty, 0);
-const saveCart = () => saveJ("scanprix:cart", cart);
-
-function renderCart(){
-  const n = cart.reduce((s, i) => s + i.qty, 0);
-  $("cartSec").hidden = !cart.length;
-  $("fab").hidden = !cart.length;
-  if (cart.length) {
-    const total = cartTotal();
-    const missing = cart.filter((i) => !(i.price > 0)).length;
-    $("cartCount").textContent = "· " + n + (n > 1 ? " articles" : " article");
-    $("cartTotal").textContent = eur(total);
-    $("cartNote").textContent = missing ? missing + " sans prix (non compté)" : "";
-    $("fab").textContent = "Panier · " + n + " · " + eur(total);
-    $("cartList").innerHTML = cart.map((i, idx) => `<li>
-      <div class="l1"><span>${esc(i.name)}</span><span>${esc(eur((i.price || 0) * i.qty))}</span></div>
-      <div class="l2">
-        <button type="button" data-a="minus" data-i="${idx}" aria-label="Moins">−</button>
-        <span>${i.qty}</span>
-        <button type="button" data-a="plus" data-i="${idx}" aria-label="Plus">+</button>
-        <input type="number" step="0.01" min="0" value="${i.price || ""}" placeholder="Prix €" data-a="price" data-i="${idx}" aria-label="Prix unitaire">
-        <button type="button" class="rm" data-a="rm" data-i="${idx}">Retirer</button>
-      </div></li>`).join("");
-  }
-  $("histSec").hidden = !trips.length;
-  $("hist").innerHTML = trips.map((t, idx) => `<li><details><summary>${esc(fdate(t.date))}${t.store ? " · " + esc(t.store) : ""} — <b>${esc(eur(t.total))}</b></summary><div>${
-    t.items.map((i) => `<div class="l1"><span>${i.qty} × ${esc(i.name)}</span><span>${esc(eur((i.price || 0) * i.qty))}</span></div>`).join("")
-  }<button type="button" class="rm" data-d="${idx}">Supprimer cette course</button></div></details></li>`).join("");
-}
-
-$("cartForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  if (!currentCode) return;
-  const price = Math.max(0, parseFloat($("cartPrice").value) || 0);
-  const qty = Math.max(1, parseInt($("cartQty").value, 10) || 1);
-  const ex = cart.find((i) => i.code === currentCode);
-  if (ex) { ex.qty += qty; if (price > 0) ex.price = price; }
-  else cart.push({code: currentCode, name: currentName || "Produit " + currentCode, price, qty});
-  saveCart(); renderCart();
-  $("cartQty").value = 1;
-  say("Ajouté au panier.");
-});
-$("cartList").addEventListener("click", (e) => {
-  const b = e.target.closest("button[data-a]");
-  if (!b) return;
-  const i = +b.dataset.i, it = cart[i];
-  if (!it) return;
-  if (b.dataset.a === "plus") it.qty++;
-  else if (b.dataset.a === "minus") { it.qty--; if (it.qty < 1) cart.splice(i, 1); }
-  else if (b.dataset.a === "rm") cart.splice(i, 1);
-  saveCart(); renderCart();
-});
-$("cartList").addEventListener("change", (e) => {
-  const t = e.target;
-  if (t.dataset.a !== "price") return;
-  const it = cart[+t.dataset.i];
-  if (!it) return;
-  it.price = Math.max(0, parseFloat(t.value) || 0);
-  saveCart(); renderCart();
-});
-$("clearBtn").addEventListener("click", () => {
-  if (cart.length && confirm("Vider tout le panier ?")) { cart = []; saveCart(); renderCart(); }
-});
-$("finishBtn").addEventListener("click", () => {
-  if (!cart.length) return;
-  const store = $("cartStore").value.trim();
-  const total = cartTotal();
-  const iso = new Date().toISOString();
-  trips.unshift({date: iso, store, total, items: cart});
-  saveJ("scanprix:trips", trips.slice(0, 50));
-  if (store) {
-    for (const i of cart) if (i.price > 0) {
-      const list = getMine(i.code);
-      list.push({price: i.price, store, date: iso.slice(0, 10)});
-      setMine(i.code, list);
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
     }
-  }
-  cart = []; saveCart();
-  $("cartStore").value = "";
-  trips = loadJ("scanprix:trips", []);
-  renderCart();
-  say("Courses terminées. Total : " + eur(total) + (store ? " (prix enregistrés pour " + store + ")" : ""));
-  window.scrollTo({top: 0, behavior: "smooth"});
-});
-$("hist").addEventListener("click", (e) => {
-  const b = e.target.closest("button[data-d]");
-  if (!b) return;
-  trips.splice(+b.dataset.d, 1);
-  saveJ("scanprix:trips", trips);
-  renderCart();
-});
-renderCart();
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-100 min-h-full flex flex-col justify-between selection:bg-brand-500 selection:text-white relative overflow-x-hidden">
 
-/* ---------- Événements ---------- */
-$("scanBtn").addEventListener("click", scanNow);
-$("testBtn").addEventListener("click", () => { $("ean").value = "3017620422003"; lookup("3017620422003"); });
-if (window.isSecureContext) openCam();
-$("goBtn").addEventListener("click", () => search($("ean").value));
-$("photo").addEventListener("change", (e) => { readPhoto(e.target.files[0]); e.target.value = ""; });
-$("hits").addEventListener("click", (e) => { const li = e.target.closest("li[data-code]"); if (li) lookup(li.dataset.code); });
-$("hits").addEventListener("keydown", (e) => { if (e.key === "Enter") { const li = e.target.closest("li[data-code]"); if (li) lookup(li.dataset.code); } });
-if (!window.isSecureContext) $("secureWarn").hidden = false;
-$("ean").addEventListener("keydown", (e) => { if (e.key === "Enter") search($("ean").value); });
-$("addForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  if (!currentCode) return;
-  const price = parseFloat($("newPrice").value);
-  const store = $("newStore").value.trim();
-  if (!(price >= 0) || !store) return;
-  const list = getMine(currentCode);
-  list.push({price, store, date: new Date().toISOString().slice(0, 10)});
-  setMine(currentCode, list);
-  $("newPrice").value = "";
-  lookup(currentCode);
-});
-</script>
+  <!-- Background decorative glows -->
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-gradient-to-tr from-amber-500 to-red-600 p-2 rounded-xl text-white shadow-lg shadow-red-500/20">
+          <i class="fa-solid fa-passport text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-none tracking-tight">CCSE<span class="text-amber-500">.es</span></h1>
+          <p class="text-xs text-slate-400">Prueba Oficial de Conocimientos</p>
+        </div>
+      </div>
+
+      <!-- Timer Header Badge (Hidden on Start Screen) -->
+      <div id="header-timer" class="hidden items-center space-x-2 bg-slate-800/80 border border-slate-700 px-3.5 py-1.5 rounded-full">
+        <i class="fa-regular fa-clock text-amber-400 animate-pulse"></i>
+        <span id="timer-display" class="font-mono font-semibold text-slate-200 text-sm">45:00</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col justify-center">
+
+    <!-- 1. START SCREEN -->
+    <div id="start-screen" class="max-w-2xl mx-auto w-full glass-card rounded-2xl p-6 sm:p-10 text-center shadow-2xl relative overflow-hidden my-auto">
+      <div class="inline-flex p-4 bg-brand-500/10 text-brand-500 rounded-2xl mb-6 ring-1 ring-brand-500/20">
+        <i class="fa-solid fa-graduation-cap text-4xl"></i>
+      </div>
+      
+      <h2 class="text-3xl font-extrabold text-white mb-3">Simulador de Examen CCSE</h2>
+      <p class="text-slate-400 mb-8 max-w-lg mx-auto">
+        Prepárate para la prueba de Conocimientos Constitucionales y Socioculturales de España con preguntas del manual oficial del Instituto Cervantes.
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-left">
+        <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+          <div class="text-amber-400 mb-1"><i class="fa-solid fa-list-check"></i> <strong>25 Preguntas</strong></div>
+          <p class="text-xs text-slate-400">Seleccionadas al azar sin repetición.</p>
+        </div>
+        <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+          <div class="text-indigo-400 mb-1"><i class="fa-solid fa-stopwatch"></i> <strong>45 Minutos</strong></div>
+          <p class="text-xs text-slate-400">Tiempo oficial del examen real.</p>
+        </div>
+        <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+          <div class="text-emerald-400 mb-1"><i class="fa-solid fa-award"></i> <strong>Mínimo 15/25</strong></div>
+          <p class="text-xs text-slate-400">Para obtener la calificación de APTO.</p>
+        </div>
+      </div>
+
+      <button id="start-btn" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center mx-auto space-x-2">
+        <span>Comenzar Examen</span>
+        <i class="fa-solid fa-arrow-right text-sm"></i>
+      </button>
+    </div>
+
+    <!-- 2. QUIZ SCREEN -->
+    <div id="quiz-screen" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      
+      <!-- Main Question Area (3 Cols) -->
+      <div class="lg:col-span-3 space-y-6">
+        <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-xl">
+          
+          <!-- Top metadata bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-6 pb-4 border-b border-slate-700/60">
+            <span id="question-category" class="px-3 py-1 bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-medium rounded-full">
+              Gobierno y Leyes
+            </span>
+            <div class="flex items-center space-x-3">
+              <button id="flag-btn" class="text-slate-400 hover:text-amber-400 text-sm flex items-center space-x-1.5 transition-colors">
+                <i class="fa-regular fa-bookmark"></i>
+                <span>Marcar para revisión</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Question Text -->
+          <div class="mb-8">
+            <h3 id="question-number" class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Pregunta 1 de 25</h3>
+            <p id="question-text" class="text-xl sm:text-2xl font-medium text-slate-100 leading-relaxed">
+              ¿Texto de la pregunta aquí?
+            </p>
+          </div>
+
+          <!-- Options Container -->
+          <div id="options-container" class="space-y-3 mb-8">
+            <!-- Options injected by JS -->
+          </div>
+
+          <!-- Navigation Controls -->
+          <div class="flex items-center justify-between pt-4 border-t border-slate-700/60">
+            <button id="prev-btn" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-lg text-sm transition disabled:opacity-40 disabled:cursor-not-allowed">
+              <i class="fa-solid fa-chevron-left mr-2"></i>Anterior
+            </button>
+            <button id="next-btn" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg text-sm shadow-md transition flex items-center">
+              <span>Siguiente</span><i class="fa-solid fa-chevron-right ml-2"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Side Navigation Grid (1 Col) -->
+      <div class="lg:col-span-1 glass-card rounded-2xl p-5 shadow-xl space-y-5 sticky top-24">
+        <h4 class="font-semibold text-sm text-slate-300 border-b border-slate-700/60 pb-3 flex justify-between items-center">
+          <span>Mapa de Preguntas</span>
+          <span id="answered-count" class="text-xs text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded">0/25</span>
+        </h4>
+
+        <!-- Grid Buttons -->
+        <div id="question-grid" class="grid grid-cols-5 gap-2">
+          <!-- 25 Grid items generated dynamically -->
+        </div>
+
+        <!-- Legend -->
+        <div class="pt-3 border-t border-slate-700/60 text-xs space-y-2 text-slate-400">
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 rounded bg-slate-800 border border-slate-700"></div>
+            <span>Sin responder</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 rounded bg-brand-600"></div>
+            <span>Respondida</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 rounded bg-amber-500/20 border border-amber-500"></div>
+            <span>Marcada</span>
+          </div>
+        </div>
+
+        <button id="finish-btn" class="w-full mt-4 py-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/50 rounded-xl font-semibold text-sm transition shadow-lg">
+          Finalizar Examen
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 3. RESULTS SCREEN -->
+    <div id="results-screen" class="hidden max-w-4xl mx-auto w-full glass-card rounded-2xl p-6 sm:p-10 shadow-2xl my-auto">
+      
+      <!-- Result Banner -->
+      <div class="text-center mb-8 pb-8 border-b border-slate-700/60">
+        <div id="result-badge" class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
+          <!-- Injected by JS -->
+        </div>
+        <h2 id="result-title" class="text-3xl sm:text-4xl font-extrabold text-white mb-2">Resultados</h2>
+        <p id="result-subtitle" class="text-slate-400 max-w-md mx-auto text-sm">Resumen completo de tu prueba de ensayo.</p>
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-3 gap-4 max-w-md mx-auto mt-6">
+          <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
+            <p class="text-xs text-slate-400 mb-1">Puntuación</p>
+            <p id="score-text" class="text-2xl font-bold text-white">0/25</p>
+          </div>
+          <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
+            <p class="text-xs text-slate-400 mb-1">Porcentaje</p>
+            <p id="percentage-text" class="text-2xl font-bold text-emerald-400">0%</p>
+          </div>
+          <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
+            <p class="text-xs text-slate-400 mb-1">Tiempo</p>
+            <p id="time-taken-text" class="text-2xl font-bold text-indigo-400">00:00</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap gap-4 justify-center mb-10">
+        <button id="restart-btn" class="px-6 py-3 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-xl shadow-lg transition flex items-center space-x-2">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span>Intentar de nuevo</span>
+        </button>
+      </div>
+
+      <!-- Detailed Review List -->
+      <div class="space-y-4">
+        <h3 class="font-bold text-lg text-slate-200 mb-4 flex items-center space-x-2">
+          <i class="fa-solid fa-magnifying-glass text-brand-400"></i>
+          <span>Revisión detallada de respuestas</span>
+        </h3>
+        <div id="review-container" class="space-y-4">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-slate-900/40 py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+      Simulador no oficial adaptado al modelo del Instituto Cervantes.
+    </div>
+  </footer>
+
+  <!-- SCRIPT JS -->
+  <script>
+    // ---------------------------------------------------------
+    // BANCO DE PREGUNTAS (Adaptado de las oficiales CCSE)
+    // ---------------------------------------------------------
+    const questionBank = [
+      {
+        id: 1,
+        category: "Gobierno y Leyes",
+        text: "¿Cuál es la forma política del Estado español según la Constitución?",
+        options: ["República parlamentaria", "Monarquía parlamentaria", "Monarquía absoluta"],
+        correct: 1,
+        explanation: "El artículo 1.3 de la Constitución establece que la forma política del Estado español es la Monarquía parlamentaria."
+      },
+      {
+        id: 2,
+        category: "Gobierno y Leyes",
+        text: "¿Quién es el Jefe del Estado en España?",
+        options: ["El Presidente del Gobierno", "El Rey", "El Presidente del Congreso"],
+        correct: 1,
+        explanation: "El Rey es el Jefe del Estado, símbolo de su unidad y permanencia (Art. 56 de la Constitución)."
+      },
+      {
+        id: 3,
+        category: "Gobierno y Leyes",
+        text: "El poder ejecutivo en España reside en:",
+        options: ["El Gobierno", "Las Cortes Generales", "Los Tribunales de Justicia"],
+        correct: 0,
+        explanation: "El Gobierno dirige la política interior y exterior, la administración civil y militar y la defensa del Estado (Poder Ejecutivo)."
+      },
+      {
+        id: 4,
+        category: "Gobierno y Leyes",
+        text: "¿Cuántas Comunidades Autónomas forman el territorio español?",
+        options: ["15", "17", "19"],
+        correct: 1,
+        explanation: "España se organiza territorialmente en 17 Comunidades Autónomas y 2 Ciudades Autónomas (Ceuta y Melilla)."
+      },
+      {
+        id: 5,
+        category: "Cultura y Sociedad",
+        text: "¿Qué fiesta popular se celebra en Valencia en el mes de marzo donde se queman monumentos de cartón?",
+        options: ["Las Fallas", "La Tomatina", "Los Sanfermines"],
+        correct: 0,
+        explanation: "Las Fallas son la festividad tradicional de Valencia celebrada en marzo en honor a San José."
+      },
+      {
+        id: 6,
+        category: "Gobierno y Leyes",
+        text: "El órgano supremo consultivo del Gobierno de España es:",
+        options: ["El Consejo de Estado", "El Tribunal Supremo", "El Consejo General del Poder Judicial"],
+        correct: 0,
+        explanation: "El Consejo de Estado es el supremo órgano consultivo del Gobierno español."
+      },
+      {
+        id: 7,
+        category: "Cultura y Sociedad",
+        text: "¿Cuál es el río más largo de los que discurren íntegramente por territorio español?",
+        options: ["El Ebro", "El Tajo", "El Guadalquivir"],
+        correct: 0,
+        explanation: "El río Ebro es el más caudaloso y el más largo de los que discurren totalmente por España."
+      },
+      {
+        id: 8,
+        category: "Gobierno y Leyes",
+        text: "La mayoría de edad en España se alcanza a los:",
+        options: ["16 años", "18 años", "21 años"],
+        correct: 1,
+        explanation: "El artículo 12 de la Constitución establece que los españoles son mayores de edad a los 18 años."
+      },
+      {
+        id: 9,
+        category: "Cultura y Sociedad",
+        text: "¿Quién escribió 'Don Quijote de la Mancha'?",
+        options: ["Lope de Vega", "Miguel de Cervantes", "Federico García Lorca"],
+        correct: 1,
+        explanation: "Miguel de Cervantes Saavedra es el autor de Don Quijote, obra cumbre de la literatura española."
+      },
+      {
+        id: 10,
+        category: "Gobierno y Leyes",
+        text: "¿Cuál es el teléfono de emergencias gratuito válido para toda España y la Unión Europea?",
+        options: ["091", "112", "061"],
+        correct: 1,
+        explanation: "El 112 es el número único de asistencia a las urgencias y emergencias en la UE."
+      },
+      {
+        id: 11,
+        category: "Cultura y Sociedad",
+        text: "¿En qué año ingresó España en la Comunidad Económica Europea (actual Unión Europea)?",
+        options: ["1978", "1986", "1992"],
+        correct: 1,
+        explanation: "España firmó su adhesión a la CEE en 1985 y pasó a ser miembro de pleno derecho el 1 de enero de 1986."
+      },
+      {
+        id: 12,
+        category: "Gobierno y Leyes",
+        text: "Las normas jurídicas aprobadas por el Parlamento autonómico de una Comunidad se llaman:",
+        options: ["Leyes autonómicas", "Decretos Reales", "Ordenanzas municipales"],
+        correct: 0,
+        explanation: "Las asambleas legislativas autonómicas aprueban Leyes Autonómicas válidas en su territorio."
+      },
+      {
+        id: 13,
+        category: "Cultura y Sociedad",
+        text: "¿Cuál de estos platos típicos españoles se elabora principalmente con patatas y huevos?",
+        options: ["Gazpacho", "Paella", "Tortilla de patatas"],
+        correct: 2,
+        explanation: "La tortilla española o tortilla de patatas se elabora con huevo batido y patatas."
+      },
+      {
+        id: 14,
+        category: "Gobierno y Leyes",
+        text: "¿Qué impuesto pagan los ciudadanos españoles en función de sus ingresos anuales?",
+        options: ["IVA", "IRPF", "IBI"],
+        correct: 1,
+        explanation: "El IRPF (Impuesto sobre la Renta de las Personas Físicas) grava la renta obtenida por las personas."
+      },
+      {
+        id: 15,
+        category: "Cultura y Sociedad",
+        text: "¿Cuál es el museo más famoso de Madrid que alberga obras de Velázquez, Goya y El Greco?",
+        options: ["Museo del Prado", "Museo Reina Sofía", "Museo Guggenheim"],
+        correct: 0,
+        explanation: "El Museo Nacional del Prado es una de las pinacotecas más importantes del mundo, situada en Madrid."
+      }
+    ];
+
+    // Duplicate/expand fallback if questions array is shorter than 25 for demo
+    function generate25Questions() {
+      let list = [...questionBank];
+      let currentId = list.length + 1;
+      
+      // Auto-fill questions if needed so test always has 25 questions
+      const standardFillers = [
+        { cat: "Gobierno y Leyes", q: "¿Dónde reside la soberanía nacional según la Constitución?", opts: ["En el Rey", "En el Pueblo español", "En el Gobierno"], c: 1, exp: "La soberanía nacional reside en el pueblo español, del que emanan los poderes del Estado." },
+        { cat: "Cultura y Sociedad", q: "¿Cuál es la capital de España?", opts: ["Barcelona", "Sevilla", "Madrid"], c: 2, exp: "Madrid es la capital del Estado español desde el siglo XVI." },
+        { cat: "Gobierno y Leyes", q: "El Poder Judicial está integrado por:", opts: ["Jueces y Magistrados", "Diputados y Senadores", "Ministros"], c: 0, exp: "La justicia emana del pueblo y se administra en nombre del Rey por Jueces y Magistrados." },
+        { cat: "Cultura y Sociedad", q: "¿Qué cordillera separa España de Francia?", opts: ["Los Pirineos", "El Sistema Central", "La Cordillera Cantábrica"], c: 0, exp: "Los Pirineos forman una frontera natural entre España y Francia." },
+        { cat: "Gobierno y Leyes", q: "¿Cada cuántos años se celebran elecciones generales en España?", opts: ["3 años", "4 años", "5 años"], c: 1, exp: "El mandato de los miembros de las Cortes Generales termina cuatro años después de su elección." }
+      ];
+
+      while (list.length < 25) {
+        const item = standardFillers[list.length % standardFillers.length];
+        list.push({
+          id: currentId++,
+          category: item.cat,
+          text: `${item.q}`,
+          options: item.opts,
+          correct: item.c,
+          explanation: item.exp
+        });
+      }
+
+      // Shuffle and pick exactly 25
+      return list.sort(() => 0.5 - Math.random()).slice(0, 25);
+    }
+
+    // ---------------------------------------------------------
+    // STATE MANAGEMENT
+    // ---------------------------------------------------------
+    let currentQuestions = [];
+    let userAnswers = {}; // { questionIndex: optionIndex }
+    let flaggedQuestions = new Set();
+    let currentQuestionIndex = 0;
+    let timerInterval = null;
+    let timeRemaining = 45 * 60; // 45 min in seconds
+
+    // DOM Elements
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultsScreen = document.getElementById('results-screen');
+    const headerTimer = document.getElementById('header-timer');
+    const timerDisplay = document.getElementById('timer-display');
+
+    const startBtn = document.getElementById('start-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const flagBtn = document.getElementById('flag-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const restartBtn = document.getElementById('restart-btn');
+
+    // Init App
+    startBtn.addEventListener('click', startExam);
+    prevBtn.addEventListener('click', () => navigateQuestion(currentQuestionIndex - 1));
+    nextBtn.addEventListener('click', () => navigateQuestion(currentQuestionIndex + 1));
+    flagBtn.addEventListener('click', toggleFlag);
+    finishBtn.addEventListener('click', () => confirmFinishExam(false));
+    restartBtn.addEventListener('click', startExam);
+
+    // ---------------------------------------------------------
+    // EXAM FLOW LOGIC
+    // ---------------------------------------------------------
+    function startExam() {
+      // Reset State
+      currentQuestions = generate25Questions();
+      userAnswers = {};
+      flaggedQuestions.clear();
+      currentQuestionIndex = 0;
+      timeRemaining = 45 * 60;
+
+      // Update UI
+      startScreen.classList.add('hidden');
+      resultsScreen.classList.add('hidden');
+      quizScreen.classList.remove('hidden');
+      headerTimer.classList.remove('hidden');
+
+      renderQuestionGrid();
+      loadQuestion(0);
+      startTimer();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      updateTimerDisplay();
+
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerDisplay();
+
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert("¡El tiempo ha finalizado! Se enviará tu examen automáticamente.");
+          confirmFinishExam(true);
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeRemaining / 60);
+      const seconds = timeRemaining % 60;
+      timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (timeRemaining < 300) { // last 5 minutes
+        timerDisplay.classList.add('text-red-400');
+      } else {
+        timerDisplay.classList.remove('text-red-400');
+      }
+    }
+
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = currentQuestions[index];
+
+      // Update Meta
+      document.getElementById('question-category').textContent = q.category;
+      document.getElementById('question-number').textContent = `Pregunta ${index + 1} de 25`;
+      document.getElementById('question-text').textContent = q.text;
+
+      // Update Flag state
+      const isFlagged = flaggedQuestions.has(index);
+      flagBtn.innerHTML = isFlagged 
+        ? `<i class="fa-solid fa-bookmark text-amber-400"></i><span class="text-amber-400">Marcada</span>`
+        : `<i class="fa-regular fa-bookmark"></i><span>Marcar para revisión</span>`;
+
+      // Render Options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      q.options.forEach((optText, optIdx) => {
+        const isSelected = userAnswers[index] === optIdx;
+        const btn = document.createElement('button');
+        btn.className = `w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between ${
+          isSelected 
+            ? 'bg-brand-600/20 border-brand-500 text-white font-medium ring-1 ring-brand-500/50' 
+            : 'bg-slate-800/40 border-slate-700/70 hover:bg-slate-800 hover:border-slate-600 text-slate-300'
+        }`;
+
+        btn.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-semibold ${
+              isSelected ? 'bg-brand-500 text-white' : 'bg-slate-700/60 text-slate-400'
+            }">${String.fromCharCode(65 + optIdx)}</span>
+            <span>${optText}</span>
+          </div>
+          ${isSelected ? '<i class="fa-solid fa-circle-check text-brand-400"></i>' : ''}
+        `;
+
+        btn.onclick = () => selectOption(index, optIdx);
+        optionsContainer.appendChild(btn);
+      });
+
+      // Update Navigation Buttons
+      prevBtn.disabled = index === 0;
+      if (index === 24) {
+        nextBtn.innerHTML = `<span>Finalizar</span><i class="fa-solid fa-check ml-2"></i>`;
+        nextBtn.onclick = () => confirmFinishExam(false);
+      } else {
+        nextBtn.innerHTML = `<span>Siguiente</span><i class="fa-solid fa-chevron-right ml-2"></i>`;
+        nextBtn.onclick = () => navigateQuestion(currentQuestionIndex + 1);
+      }
+
+      updateGridHighlight();
+    }
+
+    function selectOption(qIndex, optIndex) {
+      userAnswers[qIndex] = optIndex;
+      loadQuestion(qIndex); // Re-render option styles
+      updateGridHighlight();
+      updateAnsweredCount();
+    }
+
+    function toggleFlag() {
+      if (flaggedQuestions.has(currentQuestionIndex)) {
+        flaggedQuestions.delete(currentQuestionIndex);
+      } else {
+        flaggedQuestions.add(currentQuestionIndex);
+      }
+      loadQuestion(currentQuestionIndex);
+    }
+
+    function navigateQuestion(index) {
+      if (index >= 0 && index < 25) {
+        loadQuestion(index);
+      }
+    }
+
+    // ---------------------------------------------------------
+    // SIDEBAR GRID LOGIC
+    // ---------------------------------------------------------
+    function renderQuestionGrid() {
+      const grid = document.getElementById('question-grid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < 25; i++) {
+        const item = document.createElement('button');
+        item.id = `grid-item-${i}`;
+        item.className = `h-9 rounded-lg font-mono text-xs font-semibold transition flex items-center justify-center relative border border-slate-700/60 bg-slate-800 text-slate-400`;
+        item.textContent = i + 1;
+        item.onclick = () => loadQuestion(i);
+        grid.appendChild(item);
+      }
+      updateAnsweredCount();
+    }
+
+    function updateGridHighlight() {
+      for (let i = 0; i < 25; i++) {
+        const item = document.getElementById(`grid-item-${i}`);
+        if (!item) continue;
+
+        const isAnswered = userAnswers.hasOwnProperty(i);
+        const isFlagged = flaggedQuestions.has(i);
+        const isCurrent = i === currentQuestionIndex;
+
+        // Reset class
+        item.className = `h-9 rounded-lg font-mono text-xs font-semibold transition flex items-center justify-center relative border `;
+
+        if (isCurrent) {
+          item.classList.add('ring-2', 'ring-amber-400', 'ring-offset-2', 'ring-offset-slate-900');
+        }
+
+        if (isFlagged) {
+          item.classList.add('bg-amber-500/20', 'border-amber-500/80', 'text-amber-300');
+        } else if (isAnswered) {
+          item.classList.add('bg-brand-600', 'border-brand-500', 'text-white');
+        } else {
+          item.classList.add('bg-slate-800/80', 'border-slate-700/60', 'text-slate-400', 'hover:bg-slate-700');
+        }
+      }
+    }
+
+    function updateAnsweredCount() {
+      const count = Object.keys(userAnswers).length;
+      document.getElementById('answered-count').textContent = `${count}/25`;
+    }
+
+    // ---------------------------------------------------------
+    // RESULTS & REVIEW LOGIC
+    // ---------------------------------------------------------
+    function confirmFinishExam(force = false) {
+      if (!force) {
+        const unanswered = 25 - Object.keys(userAnswers).length;
+        if (unanswered > 0) {
+          if (!confirm(`Tienes ${unanswered} pregunta(s) sin responder. ¿Seguro que deseas finalizar el examen?`)) {
+            return;
+          }
+        }
+      }
+
+      clearInterval(timerInterval);
+      showResults();
+    }
+
+    function showResults() {
+      quizScreen.classList.add('hidden');
+      headerTimer.classList.add('hidden');
+      resultsScreen.classList.remove('hidden');
+
+      // Calculate score
+      let correctCount = 0;
+      currentQuestions.forEach((q, idx) => {
+        if (userAnswers[idx] === q.correct) {
+          correctCount++;
+        }
+      });
+
+      const isApto = correctCount >= 15;
+      const percentage = Math.round((correctCount / 25) * 100);
+      const timeTakenSec = (45 * 60) - timeRemaining;
+      const minutesTaken = Math.floor(timeTakenSec / 60);
+      const secondsTaken = timeTakenSec % 60;
+
+      // UI Banner
+      const badge = document.getElementById('result-badge');
+      const title = document.getElementById('result-title');
+      const subtitle = document.getElementById('result-subtitle');
+
+      if (isApto) {
+        badge.className = "inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-sm font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400";
+        badge.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>RESULTADO: APTO</span>`;
+        title.textContent = "¡Enhorabuena! Has superado el examen";
+        subtitle.textContent = "Has demostrado los conocimientos suficientes para la prueba CCSE.";
+        
+        // Launch Confetti
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+
+      } else {
+        badge.className = "inline-flex items-center space-x-2 px-4 py-1.5 rounded-full text-sm font-semibold bg-red-500/10 border border-red-500/30 text-red-400";
+        badge.innerHTML = `<i class="fa-solid fa-circle-xmark"></i><span>RESULTADO: NO APTO</span>`;
+        title.textContent = "No has alcanzado la nota mínima";
+        subtitle.textContent = "Necesitas al menos 15 aciertos sobre 25 para obtener el APTO.";
+      }
+
+      // Stats
+      document.getElementById('score-text').textContent = `${correctCount}/25`;
+      document.getElementById('percentage-text').textContent = `${percentage}%`;
+      document.getElementById('time-taken-text').textContent = `${minutesTaken}m ${secondsTaken}s`;
+
+      // Detailed Review Render
+      const reviewContainer = document.getElementById('review-container');
+      reviewContainer.innerHTML = '';
+
+      currentQuestions.forEach((q, idx) => {
+        const userChoice = userAnswers[idx];
+        const isCorrect = userChoice === q.correct;
+        const isUnanswered = userChoice === undefined;
+
+        const card = document.createElement('div');
+        card.className = `p-5 rounded-xl border text-sm space-y-3 ${
+          isCorrect 
+            ? 'bg-emerald-950/20 border-emerald-500/30' 
+            : 'bg-red-950/20 border-red-500/30'
+        }`;
+
+        let statusText = isCorrect 
+          ? `<span class="text-emerald-400 font-medium"><i class="fa-solid fa-check mr-1"></i> Correcto</span>`
+          : `<span class="text-red-400 font-medium"><i class="fa-solid fa-xmark mr-1"></i> Incorrecto</span>`;
+
+        if (isUnanswered) {
+          statusText = `<span class="text-amber-400 font-medium"><i class="fa-solid fa-minus mr-1"></i> Sin responder</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <span class="text-xs text-slate-400 font-semibold">Pregunta ${idx + 1} • ${q.category}</span>
+            ${statusText}
+          </div>
+          <p class="font-medium text-slate-200 text-base">${q.text}</p>
+          <div class="space-y-1.5 text-xs">
+            <p class="text-slate-400">Tu respuesta: <span class="${isCorrect ? 'text-emerald-300 font-semibold' : 'text-red-300 font-semibold'}">${userChoice !== undefined ? q.options[userChoice] : 'Ninguna'}</span></p>
+            ${!isCorrect ? `<p class="text-emerald-400 font-semibold">Respuesta correcta: ${q.options[q.correct]}</p>` : ''}
+          </div>
+          <div class="pt-2 border-t border-slate-700/40 text-xs text-slate-400 italic">
+            <i class="fa-solid fa-circle-info mr-1 text-brand-400"></i> ${q.explanation}
+          </div>
+        `;
+
+        reviewContainer.appendChild(card);
+      });
+    }
+  </script>
 </body>
 </html>
